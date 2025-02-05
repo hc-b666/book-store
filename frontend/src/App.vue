@@ -1,16 +1,11 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import { Button } from "@/components/ui/button"
+<script setup lang="ts">
+import { RouterView } from 'vue-router'
+import { Navbar } from "@/components/core/Navbar"
 </script>
 
 <template>
-  <header>
-    <nav>
-      <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/about">About</RouterLink>
-      <Button>Click me</Button>
-    </nav>
-  </header>
-
-  <RouterView />
+  <div class="h-screen flex flex-col gap-10">
+    <Navbar />
+    <RouterView />
+  </div>
 </template>
