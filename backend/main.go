@@ -3,103 +3,130 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 
+	"book-store-server/database"
+	"book-store-server/models"
+
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
-
-type Book struct {
-	Id    int    `json:"id"`
-	Title string `json:"title"`
-}
-
-var books []Book
-var idCounter int = 1
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, world!")
 }
 
 func main() {
+	if err := godotenv.Load("app.env"); err != nil {
+		log.Println("Error loading app.env file: ", err)
+	}
+
+	database.InitDB()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", helloHandler)
+	r.HandleFunc("/books", FindBooks).Methods("GET")
+	r.HandleFunc("/books/{id}", FindBook).Methods("GET")
+	r.HandleFunc("/books", CreateBook).Methods("POST")
+	r.HandleFunc("/books/{id}", UpdateBook).Methods("PUT")
+	r.HandleFunc("/books/{id}", DeleteBook).Methods("DELETE")
 
-	r.HandleFunc("/books", findBooks).Methods("GET")
-	r.HandleFunc("/books/{id}", findBook).Methods("GET")
-	r.HandleFunc("/books", createBook).Methods("POST")
-	r.HandleFunc("/books/{id}", updateBook).Methods("PUT")
-	r.HandleFunc("/books/{id}", deleteBook).Methods("DELETE")
-
-	fmt.Println("Server started at :8080")
-	http.ListenAndServe(":8080", r)
+	fmt.Printf("Server started at :%s\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
 
-func findBooks(w http.ResponseWriter, r *http.Request) {
+func FindBooks(w http.ResponseWriter, r *http.Request) {
+	var books []models.Book
+	database.DB.Preload("Genres").Find(&books)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(books)
 }
 
-func findBook(w http.ResponseWriter, r *http.Request) {
+func FindBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
 
-	for _, book := range books {
-		if book.Id == id {
-			json.NewEncoder(w).Encode(book)
-			return
-		}
+	var book models.Book
+	if err := database.DB.Preload("Genres").First(&book, id).Error; err != nil {
+		http.Error(w, "Book not found", http.StatusNotFound)
+		return
 	}
-
-	http.Error(w, "Book not found", http.StatusNotFound)
-}
-
-func createBook(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var book Book
-	_ = json.NewDecoder(r.Body).Decode(&book)
-
-	book.Id = idCounter
-	idCounter++
-
-	books = append(books, book)
 
 	json.NewEncoder(w).Encode(book)
 }
 
-func updateBook(w http.ResponseWriter, r *http.Request) {
+func CreateBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["id"])
-
-	var updatedBook Book
-	_ = json.NewDecoder(r.Body).Decode(&updatedBook)
-
-	for index, item := range books {
-		if item.Id == id {
-			books[index].Title = updatedBook.Title
-			json.NewEncoder(w).Encode(books[index])
-			return
-		}
+	var book models.Book
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	http.Error(w, "Book not found", http.StatusNotFound)
+	if err := database.DB.Create(&book).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(book)
 }
 
-func deleteBook(w http.ResponseWriter, r *http.Request) {
+func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
 
-	for index, book := range books {
-		if book.Id == id {
-			books = append(books[:index], books[index+1:]...)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+	var updatedBook models.Book
+	if err := json.NewDecoder(r.Body).Decode(&updatedBook); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	http.Error(w, "Book not found", http.StatusNotFound)
+	var book models.Book
+	if err := database.DB.First(&book, id).Error; err != nil {
+		http.Error(w, "Book not found", http.StatusNotFound)
+		return
+	}
+
+	book.Title = updatedBook.Title
+	book.Description = updatedBook.Description
+	book.ISBN = updatedBook.ISBN
+	book.Genres = updatedBook.Genres
+	book.PageCount = updatedBook.PageCount
+	book.Author = updatedBook.Author
+	book.Publisher = updatedBook.Publisher
+	book.PublishedDate = updatedBook.PublishedDate
+	book.Price = updatedBook.Price
+	book.Stock = updatedBook.Stock
+
+	if err := database.DB.Save(&book).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(book)
+}
+
+func DeleteBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
+
+	if err := database.DB.Delete(&models.Book{}, id).Error; err != nil {
+		http.Error(w, "Book not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
