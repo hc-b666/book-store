@@ -1,49 +1,14 @@
-package main
+package handlers
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"strconv"
-
 	"book-store-server/database"
 	"book-store-server/models"
+	"encoding/json"
+	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 )
-
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, world!")
-}
-
-func main() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println("Error loading app.env file: ", err)
-	}
-
-	database.InitDB()
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	r := mux.NewRouter()
-
-	r.HandleFunc("/", helloHandler)
-	r.HandleFunc("/books", FindBooks).Methods("GET")
-	r.HandleFunc("/books/{id}", FindBook).Methods("GET")
-	r.HandleFunc("/books", CreateBook).Methods("POST")
-	r.HandleFunc("/books/{id}", UpdateBook).Methods("PUT")
-	r.HandleFunc("/books/{id}", DeleteBook).Methods("DELETE")
-
-	fmt.Printf("Server started at :%s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
-}
 
 func FindBooks(w http.ResponseWriter, r *http.Request) {
 	var books []models.Book
