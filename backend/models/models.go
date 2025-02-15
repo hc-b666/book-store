@@ -5,11 +5,13 @@ import "gorm.io/gorm"
 type Book struct {
 	gorm.Model
 
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	ISBN        string  `json:"isbn"`
-	Genres      []Genre `gorm:"many2many:book_genres;" json:"genres"`
-	PageCount   string  `json:"page_count"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ISBN        string `json:"isbn"`
+	Genre       string `json:"genre"`
+	PageCount   string `json:"page_count"`
+
+	// Genres      []Genre `gorm:"many2many:book_genres;" json:"genres"`
 
 	Author string `json:"author"`
 
@@ -18,6 +20,9 @@ type Book struct {
 
 	Price float64 `json:"price"`
 	Stock int     `json:"stock"`
+
+	ImageUrl           *string `json:"image_url"`
+	BackgroundImageUrl *string `json:"background_image_url"`
 }
 
 type Genre struct {

@@ -67,13 +67,15 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	book.Title = updatedBook.Title
 	book.Description = updatedBook.Description
 	book.ISBN = updatedBook.ISBN
-	book.Genres = updatedBook.Genres
+	book.Genre = updatedBook.Genre
 	book.PageCount = updatedBook.PageCount
 	book.Author = updatedBook.Author
 	book.Publisher = updatedBook.Publisher
 	book.PublishedDate = updatedBook.PublishedDate
 	book.Price = updatedBook.Price
 	book.Stock = updatedBook.Stock
+	book.ImageUrl = updatedBook.ImageUrl
+	book.BackgroundImageUrl = updatedBook.BackgroundImageUrl
 
 	if err := database.DB.Save(&book).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
