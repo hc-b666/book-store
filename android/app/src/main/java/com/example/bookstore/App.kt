@@ -49,7 +49,7 @@ fun BookStoreApp() {
         ) {
             SearchBar()
             GenreFilter()
-            BookGrid()
+//            BookGrid(onNavigateToDetails = onNavi)
         }
     }
 }

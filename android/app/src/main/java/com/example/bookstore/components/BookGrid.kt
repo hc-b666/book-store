@@ -7,14 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BookGrid() {
+fun BookGrid(onNavigateToDetails: () -> Unit) {
     LazyVerticalGrid (
         columns = GridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(6) {
-            BookCard()
+            BookCard(onNavigateToDetails = onNavigateToDetails)
         }
     }
 }

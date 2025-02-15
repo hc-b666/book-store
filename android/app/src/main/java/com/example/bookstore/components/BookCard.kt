@@ -22,13 +22,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import androidx.compose.foundation.clickable
 
 @Composable
-fun BookCard() {
+fun BookCard(
+    onNavigateToDetails: () -> Unit
+) {
     Card (
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.7f),
+            .aspectRatio(0.7f)
+            .clickable { onNavigateToDetails() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {

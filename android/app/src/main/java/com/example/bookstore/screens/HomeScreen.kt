@@ -21,7 +21,10 @@ import com.example.bookstore.components.BookGrid
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onNavigateToAddBook: () -> Unit) {
+fun HomeScreen(
+    onNavigateToAddBook: () -> Unit,
+    onNavigateToDetails: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -50,7 +53,7 @@ fun HomeScreen(onNavigateToAddBook: () -> Unit) {
         ) {
             SearchBar()
             GenreFilter()
-            BookGrid()
+            BookGrid(onNavigateToDetails = onNavigateToDetails)
         }
     }
 }
