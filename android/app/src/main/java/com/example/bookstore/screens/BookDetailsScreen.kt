@@ -55,7 +55,6 @@ fun BookDetailsScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    // Fetch book details when the screen is first displayed
     LaunchedEffect (bookId) {
         viewModel.getBookById(bookId)
     }
@@ -154,10 +153,10 @@ fun BookDetailsScreen(
                 NavigationBarItem(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     selected = false,
-                    onClick = { /* Navigate to edit screen */ },
+                    onClick = {},
                     icon = {
                         Button(
-                            onClick = { /* Navigate to edit screen */ },
+                            onClick = {},
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp),

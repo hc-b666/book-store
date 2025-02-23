@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,12 +26,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bookstore.book.BookViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateBookScreen(onNavigateBack: () -> Unit) {
+fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = viewModel()) {
+    val bookInput by viewModel.bookInput.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+
     Scaffold (
         topBar = {
             TopAppBar(
@@ -52,13 +64,21 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
                     onClick = { },
                     icon = {
                         Button(
-                            onClick = { },
+                            onClick = {
+                                viewModel.createBook()
+                                onNavigateBack()
+                            },
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
-                            )
+                            ),
+                            enabled = !isLoading
                         ) {
-                            Text("Create book")
+                            if (isLoading) {
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
+                            } else {
+                                Text("Create book")
+                            }
                         }
                     },
                     label = { }
@@ -72,7 +92,16 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
                 .padding(paddingValues)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
+                .padding(bottom = 160.dp)
         ) {
+            if (error != null) {
+                Text(
+                    text = error ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
             Text(
                 text = "Enter book details to create",
                 style = MaterialTheme.typography.titleMedium,
@@ -80,8 +109,10 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = bookInput.title,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(title = it))
+                },
                 label = { Text("Title") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,8 +120,10 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = bookInput.description,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(description = it))
+                },
                 label = { Text("Description") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,8 +132,10 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = bookInput.author,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(author = it))
+                },
                 label = { Text("Author") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -114,14 +149,18 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = bookInput.isbn,
+                    onValueChange = {
+                        viewModel.updateBookInput(bookInput.copy(isbn = it))
+                    },
                     label = { Text("ISBN") },
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = bookInput.genre,
+                    onValueChange = {
+                        viewModel.updateBookInput(bookInput.copy(genre = it))
+                    },
                     label = { Text("Genre") },
                     modifier = Modifier.weight(1f)
                 )
@@ -134,22 +173,40 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = bookInput.price.toString(),
+                    onValueChange = { newValue ->
+                        val newPrice = newValue.toDoubleOrNull() ?: 0.0
+                        viewModel.updateBookInput(bookInput.copy(price = newPrice))
+                    },
                     label = { Text("Price") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
                 )
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
+                    value = bookInput.stock.toString(),
+                    onValueChange = { newValue ->
+                        val newStock = newValue.toIntOrNull() ?: 0
+                        viewModel.updateBookInput(bookInput.copy(stock = newStock))
+                    },
                     label = { Text("Stock") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
                 )
             }
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = bookInput.publisher,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(publisher = it))
+                },
                 label = { Text("Publisher") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,8 +214,10 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = bookInput.publishedDate,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(publishedDate = it))
+                },
                 label = { Text("Published Date") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -166,8 +225,10 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = bookInput.imageUrl,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(imageUrl = it))
+                },
                 label = { Text("Book image url") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -175,14 +236,24 @@ fun CreateBookScreen(onNavigateBack: () -> Unit) {
             )
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = bookInput.backgroundImageUrl,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(backgroundImageUrl = it))
+                },
                 label = { Text("Background image url") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
+
+            OutlinedTextField(
+                value = bookInput.pageCount,
+                onValueChange = {
+                    viewModel.updateBookInput(bookInput.copy(pageCount = it))
+                },
+                label = { Text("Page Count") },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            )
         }
     }
 }
-

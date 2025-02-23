@@ -21,6 +21,22 @@ class BookViewModel : ViewModel() {
     private val _selectedBook = MutableStateFlow<Book?>(null)
     val selectedBook: StateFlow<Book?> = _selectedBook.asStateFlow()
 
+    private val _bookInput = MutableStateFlow(CreateBookRequest(
+        title = "",
+        description = "",
+        isbn = "",
+        genre = "",
+        author = "",
+        publisher = "",
+        publishedDate = "",
+        price = 0.0,
+        stock = 0,
+        imageUrl = "",
+        backgroundImageUrl = "",
+        pageCount = "",
+    ))
+    val bookInput: StateFlow<CreateBookRequest> = _bookInput.asStateFlow()
+
     init {
         fetchBooks()
     }
@@ -45,6 +61,25 @@ class BookViewModel : ViewModel() {
             _error.value = null
             try {
                 _selectedBook.value = RetrofitClient.bookApiService.getBookById(id)
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun updateBookInput(newInput: CreateBookRequest) {
+        _bookInput.value = newInput
+    }
+
+    fun createBook() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                RetrofitClient.bookApiService.createBook(_bookInput.value)
+                fetchBooks()
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
