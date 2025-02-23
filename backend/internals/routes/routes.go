@@ -2,6 +2,7 @@ package routes
 
 import (
 	"book-store-server/internals/handlers"
+	"book-store-server/internals/middlewares"
 	"fmt"
 	"net/http"
 
@@ -14,6 +15,8 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 
 func SetupRoutes() *mux.Router {
 	r := mux.NewRouter()
+
+	r.Use(middlewares.LoggingMiddleware)
 
 	r.HandleFunc("/", helloHandler)
 	r.HandleFunc("/books", handlers.FindBooks).Methods("GET")
