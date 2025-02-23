@@ -23,9 +23,9 @@ func FindBook(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(params["id"])
 
 	var book models.Book
-	if err := database.DB.Preload("Genres").First(&book, id).Error; err != nil {
-		http.Error(w, "Book not found", http.StatusNotFound)
-		return
+	if err := database.DB.First(&book, id).Error; err != nil {
+			http.Error(w, "Book not found", http.StatusNotFound)
+			return
 	}
 
 	json.NewEncoder(w).Encode(book)
