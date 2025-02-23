@@ -1,10 +1,12 @@
 package com.example.bookstore.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -14,17 +16,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import com.example.bookstore.components.SearchBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bookstore.GenreFilter
+import com.example.bookstore.book.BookViewModel
 import com.example.bookstore.components.BookGrid
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToAddBook: () -> Unit,
-    onNavigateToDetails: () -> Unit
+    onNavigateToDetails: (Int) -> Unit,
+    viewModel: BookViewModel = viewModel()
 ) {
+    val books by viewModel.books.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -45,7 +57,7 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -53,7 +65,34 @@ fun HomeScreen(
         ) {
             SearchBar()
             GenreFilter()
-            BookGrid(onNavigateToDetails = onNavigateToDetails)
+
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                error != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Error: $error",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+                else -> {
+                    BookGrid(
+                        books = books,
+                        onNavigateToDetails = onNavigateToDetails
+                    )
+                }
+            }
         }
     }
 }

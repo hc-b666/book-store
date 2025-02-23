@@ -23,12 +23,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.clickable
+import com.example.bookstore.book.Book
 
 @Composable
 fun BookCard(
+    book: Book,
     onNavigateToDetails: () -> Unit
 ) {
-    Card (
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(0.7f)
@@ -37,8 +39,8 @@ fun BookCard(
     ) {
         Column {
             AsyncImage(
-                model = "https://i0.wp.com/charami.com/wp-content/uploads/2022/09/FLA03-04.jpeg?fit=525%2C700&ssl=1",
-                contentDescription = "Book cover",
+                model = book.imageUrl,
+                contentDescription = "${book.title} cover",
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -46,27 +48,26 @@ fun BookCard(
             )
 
             Column(
-                modifier = Modifier
-                    .padding(8.dp)
+                modifier = Modifier.padding(8.dp)
             ) {
                 Text(
-                    text = "Book of Night",
+                    text = book.title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Holly Black",
+                    text = book.author,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Row (
+                Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "$9.99",
+                        text = "$${book.price}",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -80,10 +81,10 @@ fun BookCard(
                             tint = Color(0xFFFFB800),
                             modifier = Modifier.size(16.dp)
                         )
-                        Text(
-                            text = "4.0",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+//                        Text(
+//                            text = book.rating.toString(),
+//                            style = MaterialTheme.typography.bodyMedium
+//                        )
                     }
                 }
             }
