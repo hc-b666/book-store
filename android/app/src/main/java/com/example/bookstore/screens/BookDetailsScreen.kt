@@ -98,7 +98,7 @@ fun BookDetailsScreen(
 
                         Button(
                             onClick = {
-//                                viewModel.deleteBook(bookId)
+                                viewModel.deleteBook(bookId)
                                 showDeleteDialog = false
                                 onNavigateBack()
                             },

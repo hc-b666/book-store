@@ -3,6 +3,7 @@ package com.example.bookstore.book
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookstore.RetrofitClient
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +42,7 @@ class BookViewModel : ViewModel() {
         fetchBooks()
     }
 
-    fun fetchBooks() {
+    private fun fetchBooks() {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -78,7 +79,33 @@ class BookViewModel : ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
-                RetrofitClient.bookApiService.createBook(_bookInput.value)
+                val createdBook = RetrofitClient.bookApiService.createBook(_bookInput.value)
+                _books.value += createdBook
+                fetchBooks()
+                _bookInput.value = CreateBookRequest(
+                    title = "", description = "", isbn = "", genre = "",
+                    author = "", publisher = "", publishedDate = "", price = 0.0,
+                    stock = 0, imageUrl = "", backgroundImageUrl = "", pageCount = ""
+                )
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun deleteBook(id: Int) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                RetrofitClient.bookApiService.deleteBook(id)
+                _books.value = _books.value.filter { it.id != id }
+                if (_selectedBook.value?.id == id) {
+                    _selectedBook.value = null
+                }
+                delay(300)
                 fetchBooks()
             } catch (e: Exception) {
                 _error.value = e.message
