@@ -48,6 +48,7 @@ import com.example.bookstore.book.BookViewModel
 fun BookDetailsScreen(
     bookId: Int,
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Int) -> Unit,
     viewModel: BookViewModel = viewModel()
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -156,7 +157,9 @@ fun BookDetailsScreen(
                     onClick = {},
                     icon = {
                         Button(
-                            onClick = {},
+                            onClick = {
+                                onNavigateToEdit(bookId)
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp),

@@ -16,7 +16,7 @@ data class Book(
     val publisher: String,
     @SerializedName("published_date") val publishedDate: String,
     val price: Double,
-    val stock: Float,
+    val stock: Int,
     @SerializedName("image_url") val imageUrl: String,
     @SerializedName("background_image_url") val backgroundImageUrl: String
 )

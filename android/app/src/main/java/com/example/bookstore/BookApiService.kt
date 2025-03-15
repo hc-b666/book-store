@@ -6,6 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface BookApiService {
@@ -21,4 +22,7 @@ interface BookApiService {
 
     @DELETE("books/{id}")
     suspend fun deleteBook(@Path("id") id: Int)
+
+    @PUT("books/{id}")
+    suspend fun editBook(@Path("id") id: Int, @Body request: CreateBookRequest): Book
 }

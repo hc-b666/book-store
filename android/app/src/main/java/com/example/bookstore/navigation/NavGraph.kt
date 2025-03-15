@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.bookstore.screens.BookDetailsScreen
 import com.example.bookstore.screens.CreateBookScreen
+import com.example.bookstore.screens.EditBookScreen
 import com.example.bookstore.screens.HomeScreen
 
 @Composable
@@ -43,6 +44,24 @@ fun NavGraph(navController: NavHostController) {
         ) { backStackEntry ->
             val bookId = backStackEntry.arguments?.getInt("bookId") ?: return@composable
             BookDetailsScreen(
+                bookId = bookId,
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onNavigateToEdit = { id ->
+                    navController.navigate(Screen.EditBook.createRoute(id))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.EditBook.route,
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getInt("bookId") ?: return@composable
+            EditBookScreen(
                 bookId = bookId,
                 onNavigateBack = {
                     navController.navigateUp()
