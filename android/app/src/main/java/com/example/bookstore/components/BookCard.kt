@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.height
 import com.example.bookstore.book.Book
 
 @Composable
@@ -81,10 +82,6 @@ fun BookCard(
                             tint = Color(0xFFFFB800),
                             modifier = Modifier.size(16.dp)
                         )
-//                        Text(
-//                            text = book.rating.toString(),
-//                            style = MaterialTheme.typography.bodyMedium
-//                        )
                     }
                 }
             }

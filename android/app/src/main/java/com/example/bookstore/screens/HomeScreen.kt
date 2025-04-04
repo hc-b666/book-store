@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import com.example.bookstore.components.SearchBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,10 @@ fun HomeScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    LaunchedEffect(key1 = Unit) {
+        viewModel.fetchBooks()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,25 +62,20 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp)
         ) {
-            SearchBar()
-            GenreFilter()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+            ) {
+                SearchBar()
+                GenreFilter()
 
-            when {
-                isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-                error != null -> {
+                if (error != null) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -85,12 +85,21 @@ fun HomeScreen(
                             color = MaterialTheme.colorScheme.error
                         )
                     }
-                }
-                else -> {
+                } else {
                     BookGrid(
                         books = books,
                         onNavigateToDetails = onNavigateToDetails
                     )
+                }
+            }
+
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }

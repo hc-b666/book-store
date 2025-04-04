@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -201,13 +203,14 @@ fun BookDetailsScreen(
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     AsyncImage(
                         model = book!!.imageUrl,
                         contentDescription = "${book!!.title} cover",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(300.dp),
+                            .height(450.dp),
                         contentScale = ContentScale.Crop
                     )
 
@@ -225,10 +228,32 @@ fun BookDetailsScreen(
                     )
 
                     Text(
-                        text = "$${book!!.price}",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        text = book!!.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Text(
+                        text = "Price: $${book!!.price}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+
+                    Text(
+                        text = "Stock: ${book!!.stock}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Text(
+                        text = "Publisher: " + book!!.publisher,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Text(
+                        text = "Published Date: " + book!!.publishedDate,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

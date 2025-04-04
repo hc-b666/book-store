@@ -3,7 +3,6 @@
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import com.example.bookstore.RetrofitClient
-    import kotlinx.coroutines.delay
     import kotlinx.coroutines.flow.MutableStateFlow
     import kotlinx.coroutines.flow.StateFlow
     import kotlinx.coroutines.flow.asStateFlow
@@ -42,14 +41,15 @@
             fetchBooks()
         }
 
-        private fun fetchBooks() {
+        fun fetchBooks() {
             viewModelScope.launch {
                 _isLoading.value = true
                 _error.value = null
                 try {
-                    _books.value = RetrofitClient.bookApiService.getBooks()
+                    val fetchedBooks = RetrofitClient.bookApiService.getBooks()
+                    _books.value = fetchedBooks.toList()
                 } catch (e: Exception) {
-                    _error.value = e.message
+                    _error.value = e.message ?: "Unknown error occurred"
                 } finally {
                     _isLoading.value = false
                 }
@@ -63,7 +63,7 @@
                 try {
                     _selectedBook.value = RetrofitClient.bookApiService.getBookById(id)
                 } catch (e: Exception) {
-                    _error.value = e.message
+                    _error.value = e.message ?: "Error fetching book details"
                 } finally {
                     _isLoading.value = false
                 }
@@ -79,17 +79,17 @@
                 _isLoading.value = true
                 _error.value = null
                 try {
-                    val createdBook = RetrofitClient.bookApiService.createBook(_bookInput.value)
-                    _books.value += createdBook
-                    fetchBooks()
+                    RetrofitClient.bookApiService.createBook(_bookInput.value)
+
                     _bookInput.value = CreateBookRequest(
                         title = "", description = "", isbn = "", genre = "",
                         author = "", publisher = "", publishedDate = "", price = 0.0,
                         stock = 0, imageUrl = "", backgroundImageUrl = "", pageCount = ""
                     )
+
+                    fetchBooks()
                 } catch (e: Exception) {
-                    _error.value = e.message
-                } finally {
+                    _error.value = e.message ?: "Error creating book"
                     _isLoading.value = false
                 }
             }
@@ -101,15 +101,14 @@
                 _error.value = null
                 try {
                     RetrofitClient.bookApiService.deleteBook(id)
-                    _books.value = _books.value.filter { it.id != id }
+
                     if (_selectedBook.value?.id == id) {
                         _selectedBook.value = null
                     }
-                    delay(300)
+
                     fetchBooks()
                 } catch (e: Exception) {
-                    _error.value = e.message
-                } finally {
+                    _error.value = e.message ?: "Error deleting book"
                     _isLoading.value = false
                 }
             }
@@ -120,21 +119,15 @@
                 _isLoading.value = true
                 _error.value = null
                 try {
-                    val editedBook = RetrofitClient.bookApiService.editBook(id, updatedBook)
-
-                    _books.value = _books.value.map {
-                        if (it.id == id) editedBook else it
-                    }
+                    RetrofitClient.bookApiService.editBook(id, updatedBook)
 
                     if (_selectedBook.value?.id == id) {
-                        _selectedBook.value = editedBook
+                        _selectedBook.value = RetrofitClient.bookApiService.getBookById(id)
                     }
 
-                    delay(300)
                     fetchBooks()
                 } catch (e: Exception) {
-                    _error.value = e.message
-                } finally {
+                    _error.value = e.message ?: "Error updating book"
                     _isLoading.value = false
                 }
             }
