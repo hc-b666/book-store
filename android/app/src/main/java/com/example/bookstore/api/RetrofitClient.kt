@@ -1,4 +1,4 @@
-package com.example.bookstore
+package com.example.bookstore.api
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

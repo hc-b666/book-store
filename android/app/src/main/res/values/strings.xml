@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">BookStore</string>
+
+
+    <string name="create_book_title">Enter book details to create</string>
+    <string name="edit_book_title">Edit book</string>
+    <string name="details_title">Book Details</string>
+
+    <!--  Form Labels  -->
+    <string name="label_title">Title</string>
+    <string name="label_description">Description</string>
+    <string name="label_author">Author</string>
+    <string name="label_isbn">ISBN</string>
+    <string name="label_genre">Genre</string>
+    <string name="label_price">Price</string>
+    <string name="label_stock">Stock</string>
+    <string name="label_publisher">Publisher</string>
+    <string name="label_published_date">Published Date</string>
+    <string name="label_image_url">Book image url</string>
+    <string name="label_background_image">Background image url</string>
+    <string name="label_page_count">Page Count</string>
+    <string name="button_create_book">Create book</string>
+    <string name="button_edit_book">Save changes</string>
+
+    <string name="delete_confirmation">Delete Confirmation</string>
+    <string name="delete_reminder">Are you sure you want to remove this book from the stock? You cannot go back after you delete. Think about it!</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_edit">Edit</string>
+    <string name="button_cancel">Cancel</string>
 </resources>

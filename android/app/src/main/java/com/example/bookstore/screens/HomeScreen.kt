@@ -21,9 +21,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.bookstore.GenreFilter
+import com.example.bookstore.components.GenreFilter
+import com.example.bookstore.R
 import com.example.bookstore.book.BookViewModel
 import com.example.bookstore.components.BookGrid
 
@@ -46,7 +48,7 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Book Store")
+                    Text(text = stringResource(R.string.app_name))
                 }
             )
         },

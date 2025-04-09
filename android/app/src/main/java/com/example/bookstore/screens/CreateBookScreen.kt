@@ -1,6 +1,7 @@
 package com.example.bookstore.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,16 +25,24 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bookstore.R
 import com.example.bookstore.book.BookViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,12 +50,21 @@ import com.example.bookstore.book.BookViewModel
 fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = viewModel()) {
     val bookInput by viewModel.bookInput.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val snackbarMessage by viewModel.snackbarMessage.collectAsState()
+    val validationState by viewModel.validationState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let {
+            snackbarHostState.showSnackbar(it.message)
+        }
+    }
 
     Scaffold (
         topBar = {
             TopAppBar(
-                title = { Text("Book Store") },
+                title = { Text(stringResource(R.string.app_name)) },
                 navigationIcon = {
                     IconButton (onClick = onNavigateBack) {
                         Icon(
@@ -66,7 +85,6 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                         Button(
                             onClick = {
                                 viewModel.createBook()
-                                onNavigateBack()
                             },
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -77,16 +95,46 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                             if (isLoading) {
                                 CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
                             } else {
-                                Text("Create book")
+                                Text(stringResource(R.string.button_create_book))
                             }
                         }
                     },
                     label = { }
                 )
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Snackbar(
+                        modifier = Modifier.fillMaxWidth(),
+                        action = {
+                            IconButton(onClick = { viewModel.dismissSnackbar() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Dismiss"
+                                )
+                            }
+                        },
+                        containerColor = if (snackbarMessage?.isError == true)
+                            MaterialTheme.colorScheme.errorContainer
+                        else
+                            MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = if (snackbarMessage?.isError == true)
+                            MaterialTheme.colorScheme.onErrorContainer
+                        else
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                    ) {
+                        Text(data.visuals.message)
+                    }
+                }
+            }
         }
     ) { paddingValues ->
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -94,16 +142,8 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 160.dp)
         ) {
-            if (error != null) {
-                Text(
-                    text = error ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-            }
-
             Text(
-                text = "Enter book details to create",
+                text = stringResource(R.string.create_book_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -113,10 +153,19 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(title = it))
                 },
-                label = { Text("Title") },
+                label = { Text(stringResource(R.string.label_title)) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = if (validationState.titleError != null) 0.dp else 8.dp),
+                isError = validationState.titleError != null,
+                supportingText = {
+                    validationState.titleError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             )
 
             OutlinedTextField(
@@ -124,7 +173,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(description = it))
                 },
-                label = { Text("Description") },
+                label = { Text(stringResource(R.string.label_description)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -136,16 +185,25 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(author = it))
                 },
-                label = { Text("Author") },
+                label = { Text(stringResource(R.string.label_author)) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = if (validationState.authorError != null) 0.dp else 8.dp),
+                isError = validationState.authorError != null,
+                supportingText = {
+                    validationState.authorError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             )
 
-            Row (
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = if (validationState.isbnError != null) 0.dp else 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
@@ -153,15 +211,24 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                     onValueChange = {
                         viewModel.updateBookInput(bookInput.copy(isbn = it))
                     },
-                    label = { Text("ISBN") },
-                    modifier = Modifier.weight(1f)
+                    label = { Text(stringResource(R.string.label_isbn)) },
+                    modifier = Modifier.weight(1f),
+                    isError = validationState.isbnError != null,
+                    supportingText = {
+                        validationState.isbnError?.let {
+                            Text(
+                                text = it,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 )
                 OutlinedTextField(
                     value = bookInput.genre,
                     onValueChange = {
                         viewModel.updateBookInput(bookInput.copy(genre = it))
                     },
-                    label = { Text("Genre") },
+                    label = { Text(stringResource(R.string.label_genre)) },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -169,7 +236,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = if (validationState.priceError != null) 0.dp else 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
@@ -178,13 +245,22 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                         val newPrice = newValue.toDoubleOrNull() ?: 0.0
                         viewModel.updateBookInput(bookInput.copy(price = newPrice))
                     },
-                    label = { Text("Price") },
+                    label = { Text(stringResource(R.string.label_price)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Decimal,
                         imeAction = ImeAction.Next
                     ),
-                    singleLine = true
+                    singleLine = true,
+                    isError = validationState.priceError != null,
+                    supportingText = {
+                        validationState.priceError?.let {
+                            Text(
+                                text = it,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 )
                 OutlinedTextField(
                     value = bookInput.stock.toString(),
@@ -192,7 +268,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                         val newStock = newValue.toIntOrNull() ?: 0
                         viewModel.updateBookInput(bookInput.copy(stock = newStock))
                     },
-                    label = { Text("Stock") },
+                    label = { Text(stringResource(R.string.label_stock)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
@@ -207,7 +283,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(publisher = it))
                 },
-                label = { Text("Publisher") },
+                label = { Text(stringResource(R.string.label_publisher)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -218,7 +294,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(publishedDate = it))
                 },
-                label = { Text("Published Date") },
+                label = { Text(stringResource(R.string.label_published_date)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -229,7 +305,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(imageUrl = it))
                 },
-                label = { Text("Book image url") },
+                label = { Text(stringResource(R.string.label_image_url)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -240,7 +316,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(backgroundImageUrl = it))
                 },
-                label = { Text("Background image url") },
+                label = { Text(stringResource(R.string.label_background_image)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -251,7 +327,7 @@ fun CreateBookScreen(onNavigateBack: () -> Unit, viewModel: BookViewModel = view
                 onValueChange = {
                     viewModel.updateBookInput(bookInput.copy(pageCount = it))
                 },
-                label = { Text("Page Count") },
+                label = { Text(stringResource(R.string.label_page_count)) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             )
         }

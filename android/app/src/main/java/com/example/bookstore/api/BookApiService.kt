@@ -1,4 +1,4 @@
-package com.example.bookstore
+package com.example.bookstore.api
 
 import com.example.bookstore.book.Book
 import com.example.bookstore.book.CreateBookRequest

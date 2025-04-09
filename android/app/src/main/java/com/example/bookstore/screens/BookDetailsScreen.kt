@@ -39,10 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.bookstore.R
 import com.example.bookstore.book.BookViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,13 +79,13 @@ fun BookDetailsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Delete Confirmation",
+                        text = stringResource(R.string.delete_confirmation),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
                     Text(
-                        text = "Are you sure you want to remove this book from the stock? You cannot go back after you delete. Think about it!",
+                        text = stringResource(R.string.delete_reminder),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
@@ -96,7 +98,7 @@ fun BookDetailsScreen(
                             onClick = { showDeleteDialog = false },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.button_cancel))
                         }
 
                         Button(
@@ -110,7 +112,7 @@ fun BookDetailsScreen(
                                 containerColor = Color.Red
                             )
                         ) {
-                            Text("Delete")
+                            Text(stringResource(R.string.button_delete))
                         }
                     }
                 }
@@ -121,7 +123,7 @@ fun BookDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Book Details") },
+                title = { Text(stringResource(R.string.details_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -148,7 +150,7 @@ fun BookDetailsScreen(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Text("Delete")
+                            Text(stringResource(R.string.button_delete))
                         }
                     },
                     label = { }
@@ -169,7 +171,7 @@ fun BookDetailsScreen(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Text("Edit")
+                            Text(stringResource(R.string.button_edit))
                         }
                     },
                     label = { }

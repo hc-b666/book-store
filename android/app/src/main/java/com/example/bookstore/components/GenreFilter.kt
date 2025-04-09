@@ -1,4 +1,4 @@
-package com.example.bookstore
+package com.example.bookstore.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
